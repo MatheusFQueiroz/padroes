@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Qual vem depois?</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:"Trebuchet MS",Verdana,sans-serif;color:#2A3081;background:#F4F5FB;display:flex;flex-direction:column}
+header{background:#2A3081;color:#fff;padding:12px 20px;display:flex;align-items:center;gap:14px;flex-shrink:0}
+header h1{font-size:24px}
+.chip{font-size:20px;font-weight:bold;border-radius:12px;padding:8px 16px}
+#nivelC{background:#fff;color:#2A3081;margin-left:auto}
+#estrelasC{background:#FFD900;color:#2A3081}
+#palco{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;padding:16px;position:relative}
+#pergunta{font-size:30px;font-weight:bold;text-align:center}
+#seq{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.item{width:92px;height:92px;border-radius:18px;background:#fff;border:5px solid #C2C7E0;display:flex;align-items:center;justify-content:center;font-size:56px;cursor:default;transition:transform .15s}
+.item.q{border:5px dashed #2A3081;color:#2A3081;font-size:52px;font-weight:bold}
+.item.click{cursor:pointer}
+.item.click:hover{transform:scale(1.08);border-color:#FFD900}
+#opcoes{display:flex;gap:20px}
+.op{width:120px;height:120px;border-radius:22px;background:#fff;border:6px solid #2A3081;font-size:70px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s}
+.op:hover{transform:scale(1.08);background:#FFF9D6}
+#aviso{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);font-size:26px;font-weight:bold;padding:12px 26px;border-radius:14px;display:none}
+#festa{position:absolute;inset:0;background:rgba(255,255,255,.97);display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center}
+#festa .tit{font-size:54px;font-weight:bold}
+#festa .sub{font-size:26px;color:#555}
+#festa button{font:inherit;font-size:26px;font-weight:bold;padding:16px 34px;border:none;border-radius:14px;background:#2F9E44;color:#fff;cursor:pointer}
+</style></head><body>
+<header><h1>QUAL VEM DEPOIS?</h1><div class="chip" id="nivelC">—</div><div class="chip" id="estrelasC">⭐ 0</div></header>
+<div id="palco">
+ <div id="pergunta">—</div>
+ <div id="seq"></div>
+ <div id="opcoes"></div>
+ <div id="aviso"></div>
+ <div id="festa"></div>
+</div>
+<script>
+(function(){
+// tipo 'next' = qual vem depois ; tipo 'erro' = ache o que está errado
+var NIV=[
+ {t:'next',u:['🔴','🔵'],n:5},
+ {t:'next',u:['🐶','🐱'],n:5},
+ {t:'next',u:['🔴','🔴','🔵'],n:5},
+ {t:'next',u:['⭐','🌙'],n:6},
+ {t:'next',u:['🔴','🔵','🟡'],n:5},
+ {t:'next',u:['🍎','🍌','🍌'],n:5},
+ {t:'next',u:['🐶','🐱','🐰'],n:7},
+ {t:'next',u:['🟢','🟢','🟡','🟡'],n:6},
+ {t:'next',u:['⭐','⭐','🌙'],n:7},
+ {t:'next',u:['🔴','🔵','🟡','🟢'],n:6},
+ {t:'erro',u:['🐶','🐱'],n:7,e:4,x:'🐰'},
+ {t:'erro',u:['🔴','🔵','🟡'],n:9,e:5,x:'🔵'},
+ {t:'erro',u:['🍎','🍎','🍌'],n:9,e:7,x:'🍌'}
+];
+var TOM={'🔴':1,'🔵':1,'🟡':1,'🟢':1,'🐶':1,'🐱':1,'🐰':1,'⭐':1,'🌙':1,'🍎':1,'🍌':1};
+var idx=0,estrelas=0,tent=0,seqAtual=[];
+var $=function(i){return document.getElementById(i)};
+
+function aviso(txt,cor){var a=$('aviso');a.textContent=txt;a.style.background=cor;a.style.color='#fff';
+  a.style.display='block';clearTimeout(a._t);a._t=setTimeout(function(){a.style.display='none'},1300);}
+function monta(){
+  var L=NIV[idx]; tent=0; $('festa').style.display='none';
+  $('nivelC').textContent='Nível '+(idx+1)+' de '+NIV.length;
+  seqAtual=[]; for(var i=0;i<L.n;i++) seqAtual.push(L.u[i%L.u.length]);
+  if(L.t==='erro') seqAtual[L.e]=L.x;
+  var s=$('seq'); s.innerHTML=''; var o=$('opcoes'); o.innerHTML='';
+  seqAtual.forEach(function(e,i){
+    var d=document.createElement('div'); d.className='item'; d.textContent=e;
+    if(L.t==='erro'){ d.className='item click'; d.onclick=function(){ escolheErro(i,d); }; }
+    s.appendChild(d);
+  });
+  if(L.t==='next'){
+    $('pergunta').textContent='Qual vem depois?';
+    var q=document.createElement('div'); q.className='item q'; q.textContent='?'; s.appendChild(q);
+    var certo=L.u[L.n%L.u.length];
+    var pool=[]; Object.keys(TOM).forEach(function(k){ if(L.u.indexOf(k)>=0 && pool.indexOf(k)<0) pool.push(k); });
+    Object.keys(TOM).forEach(function(k){ if(pool.length<3 && pool.indexOf(k)<0) pool.push(k); });
+    pool=pool.slice(0,3); if(pool.indexOf(certo)<0) pool[0]=certo;
+    pool.sort(function(){return Math.random()-.5});
+    pool.forEach(function(e){ var b=document.createElement('div'); b.className='op'; b.textContent=e;
+      b.onclick=function(){ escolhe(e,certo); }; o.appendChild(b); });
+  } else {
+    $('pergunta').textContent='🔍 Tem um ERRADO escondido. Clique nele!';
+  }
+}
+function escolhe(e,certo){
+  if(e===certo){ acerto(); } else { tent++; aviso('Quase! Olhe o pedaço que se repete.','#E8590C'); }
+}
+function escolheErro(i,d){
+  var L=NIV[idx];
+  if(i===L.e){ d.style.borderColor='#2F9E44'; acerto(); }
+  else { tent++; aviso('Esse está certo! Procure outro.','#E8590C'); }
+}
+function acerto(){
+  var ganha=tent===0?3:(tent===1?2:1); estrelas+=ganha; $('estrelasC').textContent='⭐ '+estrelas;
+  var ult=idx===NIV.length-1;
+  var f=$('festa');
+  f.innerHTML='<div class="tit">'+(tent===0?'🎉 ACERTOU!':'👍 ISSO!')+'</div>'+
+    '<div class="sub">Você ganhou '+'⭐'.repeat(ganha)+'</div>'+
+    '<button id="btS">'+(ult?'VER MINHAS ESTRELAS':'PRÓXIMO →')+'</button>';
+  f.style.display='flex';
+  $('btS').onclick=function(){
+    if(ult){ f.innerHTML='<div class="tit">🏆 VOCÊ TERMINOU!</div><div class="sub">Você juntou <b>'+estrelas+
+      '</b> estrelas de '+(NIV.length*3)+'</div><button id="btR">JOGAR DE NOVO</button>';
+      $('btR').onclick=function(){ idx=0; estrelas=0; $('estrelasC').textContent='⭐ 0'; monta(); };
+    } else { idx++; monta(); }
+  };
+}
+monta();
+})();
+</script></body></html>

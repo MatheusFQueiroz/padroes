@@ -1,451 +1,54 @@
 <!DOCTYPE html>
-<html lang="pt-BR"><head><meta charset="utf-8">
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#E9EFFF">
 <title>Qual vem depois?</title>
-<meta name="description" content="Jogo de padrões e sequências para crianças: descubra o que vem depois, complete, encontre o intruso e construa padrões.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦉</text></svg>">
-<style>
-:root{
-  --tinta:#2A3081; --tinta-suave:#5A5F9E; --fundo:#F4F5FB; --papel:#FFFFFF; --borda:#D6D9EC;
-  --ok:#2F9E44; --ok-suave:#E6F6EA; --calma:#3B6FD8; --calma-suave:#E8EFFD; --sol:#FFD43B;
-  --sombra:0 4px 0 rgba(42,48,129,.12);
-  --raio:20px;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{min-height:100%}
-body{font-family:"Trebuchet MS","Nunito",Verdana,sans-serif;color:var(--tinta);background:var(--fundo);
-  display:flex;flex-direction:column;min-height:100vh;-webkit-tap-highlight-color:transparent}
-button{font:inherit;color:inherit;cursor:pointer}
-button:focus-visible,.alvo:focus-visible{outline:4px solid var(--calma);outline-offset:3px}
-.oculto{display:none!important}
+<meta name="description" content="Jogo de padrões e sequências para crianças: descubra o que vem depois, complete, encontre a figura fora do lugar e construa padrões.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preload" href="fontes/fredoka-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fontes/nunito-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<div class="ceu" aria-hidden="true"><i></i><i></i><i></i><i></i><span class="nuvem n1"></span><span class="nuvem n2"></span></div>
 
-/* ---------- topo ---------- */
-header{background:var(--tinta);color:#fff;padding:10px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0}
-header h1{font-size:clamp(18px,4vw,26px);letter-spacing:.5px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.btTopo{background:rgba(255,255,255,.14);border:none;border-radius:14px;color:#fff;font-size:22px;
-  min-width:48px;height:48px;padding:0 12px;display:flex;align-items:center;gap:6px;font-weight:bold}
-.btTopo:hover{background:rgba(255,255,255,.25)}
-.btTopo span{font-size:16px}
-
-main{flex:1;display:flex;flex-direction:column}
-.tela{flex:1;display:flex;flex-direction:column;align-items:center;padding:20px 16px 32px}
-
-/* ---------- mapa ---------- */
-.boasVindas{display:flex;align-items:center;gap:14px;max-width:760px;width:100%;margin-bottom:18px}
-.coruja{font-size:64px;line-height:1;flex-shrink:0}
-.balao{background:var(--papel);border:3px solid var(--borda);border-radius:var(--raio);padding:14px 18px;
-  font-size:clamp(17px,3.2vw,21px);position:relative;flex:1;box-shadow:var(--sombra)}
-.balao::before{content:"";position:absolute;left:-14px;top:22px;border:8px solid transparent;border-right-color:var(--borda);border-width:8px 12px}
-.mundos{display:flex;flex-direction:column;gap:18px;max-width:760px;width:100%}
-.mundo{border-radius:26px;padding:16px 18px 20px;border:3px solid rgba(0,0,0,.06);box-shadow:var(--sombra)}
-.mundo h2{font-size:clamp(19px,3.6vw,24px);display:flex;align-items:center;gap:10px}
-.mundo h2 .ic{font-size:34px}
-.mundo p{font-size:16px;color:var(--tinta-suave);margin:4px 0 14px 44px}
-.trilha{display:flex;flex-wrap:wrap;gap:12px;align-items:center;position:relative}
-.fase{width:64px;height:64px;border-radius:50%;border:4px solid var(--tinta);background:var(--papel);
-  font-size:24px;font-weight:bold;display:flex;align-items:center;justify-content:center;position:relative;transition:transform .15s}
-.fase:hover{transform:scale(1.07)}
-.fase.feita{background:var(--papel);border-color:var(--ok);font-size:30px}
-.fase.proxima{background:var(--sol);box-shadow:0 0 0 6px rgba(255,212,59,.35)}
-.fase.trancada{border-style:dashed;border-color:#B7BBD6;color:#B7BBD6;cursor:not-allowed}
-.fase.trancada:hover{transform:none}
-.liga{width:14px;height:4px;background:rgba(42,48,129,.18);border-radius:2px}
-
-/* ---------- jogo ---------- */
-#jogo{justify-content:flex-start;gap:clamp(14px,3vh,26px)}
-.topoJogo{display:flex;align-items:center;gap:12px;max-width:900px;width:100%}
-.topoJogo .coruja{font-size:54px}
-.topoJogo .balao{font-size:clamp(18px,3.4vw,24px);font-weight:bold}
-.passos{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
-.passos i{width:14px;height:14px;border-radius:50%;background:#D6D9EC;display:block}
-.passos i.f{background:var(--ok)}
-.passos i.a{background:var(--sol);outline:3px solid var(--tinta)}
-#seq{display:flex;gap:clamp(6px,1.4vw,12px);flex-wrap:wrap;justify-content:center;max-width:1120px;padding:14px;
-  background:var(--papel);border-radius:26px;border:3px solid var(--borda)}
-.item{--t:clamp(56px,11vw,92px);width:var(--t);height:var(--t);border-radius:18px;background:var(--papel);
-  border:4px solid var(--borda);display:flex;align-items:center;justify-content:center;flex-wrap:wrap;align-content:center;
-  font-size:calc(var(--t)*.58);line-height:1;transition:transform .2s,background .2s,border-color .2s;user-select:none}
-.item.mini{font-size:calc(var(--t)*.24);gap:1px;padding:4px}
-.item.q{border:4px dashed var(--tinta);color:var(--tinta);font-weight:bold;background:#FAFAFF}
-.item.q.agora{border-color:var(--calma);background:var(--calma-suave);animation:pulsa 1.6s ease-in-out infinite}
-.item.preenchido{border-color:var(--ok);background:var(--ok-suave)}
-.item.alvo{cursor:pointer}
-.item.alvo:hover{transform:translateY(-4px);border-color:var(--calma)}
-.item.dica{background:#FFF6D1;border-color:#F0C419}
-.item.achou{border-color:var(--ok);background:var(--ok-suave)}
-.item.conferido{border-color:#9FB3E8;background:var(--calma-suave)}
-#opcoes{display:flex;gap:clamp(12px,3vw,22px);flex-wrap:wrap;justify-content:center}
-.op{--t:clamp(84px,17vw,124px);width:var(--t);height:var(--t);border-radius:24px;background:var(--papel);
-  border:5px solid var(--tinta);font-size:calc(var(--t)*.56);line-height:1;display:flex;align-items:center;justify-content:center;
-  flex-wrap:wrap;align-content:center;box-shadow:0 6px 0 var(--tinta);transition:transform .12s,box-shadow .12s,background .15s}
-.op.mini{font-size:calc(var(--t)*.22);gap:2px;padding:6px}
-.op:hover{background:#FFF9D6}
-.op:active{transform:translateY(4px);box-shadow:0 2px 0 var(--tinta)}
-.acoesJogo{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
-.btSec{background:var(--papel);border:3px solid var(--borda);border-radius:16px;padding:10px 18px;font-size:18px;font-weight:bold;
-  display:flex;align-items:center;gap:8px;min-height:52px}
-.btSec:hover{border-color:var(--tinta)}
-#aviso{min-height:60px;display:flex;align-items:center;justify-content:center}
-#aviso div{background:var(--calma-suave);color:var(--tinta);border:3px solid #BFD0F7;font-size:clamp(17px,3vw,22px);font-weight:bold;
-  padding:10px 22px;border-radius:16px;text-align:center}
-
-/* ---------- prêmio ---------- */
-.veu{position:fixed;inset:0;background:rgba(244,245,251,.94);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
-.cartao{background:var(--papel);border-radius:30px;border:4px solid var(--borda);padding:28px 26px;max-width:480px;width:100%;
-  text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px;box-shadow:0 10px 0 rgba(42,48,129,.1)}
-.cartao .tit{font-size:clamp(28px,6vw,40px);font-weight:bold}
-.cartao .sub{font-size:20px;color:var(--tinta-suave)}
-.figurinha{width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,#FFF6D1 0 60%,#FFE8A3 100%);
-  border:6px solid var(--sol);font-size:84px;display:flex;align-items:center;justify-content:center}
-.btPrin{background:var(--ok);color:#fff;border:none;border-radius:18px;padding:16px 30px;font-size:24px;font-weight:bold;
-  box-shadow:0 6px 0 #237A34;min-height:64px}
-.btPrin:active{transform:translateY(4px);box-shadow:0 2px 0 #237A34}
-.linhaBts{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
-
-/* ---------- álbum ---------- */
-.album{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:12px;max-width:760px;width:100%}
-.slot{aspect-ratio:1;border-radius:50%;background:var(--papel);border:4px dashed var(--borda);display:flex;align-items:center;justify-content:center;
-  font-size:46px;color:#C9CCE2}
-.slot.tem{border:4px solid var(--sol);background:radial-gradient(circle,#FFF6D1 0 60%,#FFE8A3 100%)}
-.tituloTela{font-size:clamp(22px,4.4vw,30px);margin-bottom:6px;text-align:center}
-.textoTela{font-size:18px;color:var(--tinta-suave);margin-bottom:18px;text-align:center;max-width:620px}
-.grupoAlbum{max-width:760px;width:100%;margin-bottom:18px}
-.grupoAlbum h3{font-size:20px;margin-bottom:10px;display:flex;gap:8px;align-items:center}
-
-/* ---------- ajustes ---------- */
-.ajustes{max-width:560px;width:100%;display:flex;flex-direction:column;gap:12px}
-.ajuste{background:var(--papel);border:3px solid var(--borda);border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:14px;font-size:18px;text-align:left}
-.ajuste .txt{flex:1}
-.ajuste small{display:block;color:var(--tinta-suave);font-size:15px;margin-top:2px}
-.chave{width:64px;height:36px;border-radius:18px;background:#C9CCE2;position:relative;flex-shrink:0;transition:background .2s}
-.chave::after{content:"";position:absolute;top:4px;left:4px;width:28px;height:28px;border-radius:50%;background:#fff;transition:left .2s}
-.ajuste[aria-checked="true"] .chave{background:var(--ok)}
-.ajuste[aria-checked="true"] .chave::after{left:32px}
-.perigo{color:#8A3B12}
-
-/* ---------- animações (desligáveis) ---------- */
-@keyframes pulsa{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
-@keyframes balanca{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-@keyframes surge{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
-.balanca{animation:balanca .35s ease-in-out 2}
-.surge{animation:surge .45s ease-out}
-body.semAnim *,body.semAnim *::before,body.semAnim *::after{animation:none!important;transition:none!important}
-
-@media (max-width:520px){
-  .coruja{font-size:48px}
-  .topoJogo .coruja{font-size:42px}
-  .balao::before{display:none}
-  .mundo p{margin-left:0}
-  .fase{width:56px;height:56px;font-size:21px}
-  .liga{width:8px}
-  .btTopo span{display:none}
-}
-</style></head><body>
-<header>
-  <button class="btTopo" id="btMapa" aria-label="Voltar ao mapa">🗺️<span>Mapa</span></button>
-  <h1>QUAL VEM DEPOIS?</h1>
-  <button class="btTopo" id="btAlbum" aria-label="Meu álbum de figurinhas">📒<span>Álbum</span></button>
-  <button class="btTopo" id="btAjustes" aria-label="Ajustes">⚙️</button>
+<header class="barra">
+  <button class="marca" id="btInicio" aria-label="Ir para o mapa"><span><b>Qual vem depois?</b><small>Jogo de padrões com a coruja Lu</small></span></button>
+  <button class="bt-barra" id="btMapa"><span>Mapa</span></button>
+  <button class="bt-barra" id="btAlbum"><span>Álbum</span></button>
+  <button class="bt-barra" id="btAjustes" aria-label="Ajustes"><span>Ajustes</span></button>
 </header>
+
 <main>
   <section class="tela" id="mapa"></section>
+
   <section class="tela oculto" id="jogo">
-    <div class="topoJogo">
-      <div class="coruja" aria-hidden="true">🦉</div>
-      <div class="balao" id="pergunta" aria-live="polite">—</div>
-      <button class="btSec" id="btOuvir" aria-label="Ouvir a instrução">🔊</button>
+    <div class="jogo-topo">
+      <button class="bt-voltar" id="btVoltar">Mapa</button>
+      <div class="chip" id="chipMundo"></div>
+      <div class="passos" id="passos" aria-hidden="true"></div>
+      <button class="bt-redondo" id="btOuvir" aria-label="Ouvir a instrução"></button>
     </div>
-    <div class="passos" id="passos" aria-hidden="true"></div>
-    <div id="seq"></div>
-    <div id="opcoes"></div>
-    <div id="aviso" aria-live="polite"></div>
-    <div class="acoesJogo">
-      <button class="btSec" id="btDica">💡 Quero uma dica</button>
+    <div class="fala">
+      <div id="mascoteJogo"></div>
+      <div class="balao"><div class="balao-txt" id="pergunta" aria-live="polite"></div></div>
     </div>
+    <div class="tabuleiro" id="seq"></div>
+    <div class="opcoes" id="opcoes"></div>
+    <div class="aviso" id="aviso" aria-live="polite"></div>
+    <button class="bt-dica" id="btDica">Quero uma dica</button>
   </section>
+
   <section class="tela oculto" id="album"></section>
   <section class="tela oculto" id="ajustes"></section>
 </main>
-<div class="veu oculto" id="premio" role="dialog" aria-modal="true"></div>
 
-<script>
-(function(){
-/*
-  Tipos de fase:
-   next      – qual vem depois?
-   meio      – qual está faltando no meio? (g = posição do buraco)
-   erro      – encontre o intruso (e = posição, x = figura errada)
-   construir – complete as últimas k casas, uma de cada vez
-  u = pedaço que se repete · n = tamanho da sequência · d = figura extra nas opções
-  s/a/o = sequência escrita à mão (s), resposta (a) e opções (o) para padrões que crescem
-*/
-var MUNDOS=[
- {nome:'Jardim das Cores',ic:'🌷',cor:'#FDEFF4',txt:'Dois que se revezam: um, outro, um, outro…',fases:[
-  {t:'next',u:['🔴','🔵'],n:4,d:'🟡',f:'🌷'},
-  {t:'next',u:['🟢','🟡'],n:5,d:'🔴',f:'🌻'},
-  {t:'next',u:['🐶','🐱'],n:5,d:'🐰',f:'🐞'},
-  {t:'next',u:['🍎','🍌'],n:6,d:'🍇',f:'🍓'},
-  {t:'next',u:['⭐','🌙'],n:5,d:'☀️',f:'🌈'},
-  {t:'next',u:['🌸','🍃'],n:6,d:'🌻',f:'🦋'}]},
- {nome:'Floresta dos Bichos',ic:'🌳',cor:'#EAF6EC',txt:'Agora o pedaço que se repete fica maior.',fases:[
-  {t:'next',u:['🔴','🔴','🔵'],n:5,d:'🟡',f:'🍄'},
-  {t:'next',u:['🐸','🐢','🐢'],n:5,d:'🐟',f:'🐸'},
-  {t:'next',u:['🔴','🔵','🟡'],n:5,d:'🟢',f:'🦔'},
-  {t:'next',u:['🐶','🐱','🐰'],n:7,d:'🐭',f:'🦊'},
-  {t:'next',u:['🟢','🟢','🟡','🟡'],n:6,d:'🔵',f:'🐿️'},
-  {t:'next',u:['🦋','🐝','🐞','🐝'],n:6,d:'🐛',f:'🦉'}]},
- {nome:'Praia do Meio',ic:'🏖️',cor:'#E6F4FB',txt:'Alguém sumiu do meio da fila. Quem é?',fases:[
-  {t:'meio',u:['🐚','⭐'],n:6,g:3,d:'🐠',f:'🐚'},
-  {t:'meio',u:['🔵','🟡'],n:7,g:2,d:'🟢',f:'🦀'},
-  {t:'meio',u:['🐠','🐠','🦀'],n:8,g:5,d:'🐙',f:'🐠'},
-  {t:'meio',u:['🍉','🍍','🥥'],n:8,g:4,d:'🍓',f:'🍉'},
-  {t:'meio',u:['🔴','🔵','🔵'],n:8,g:1,d:'🟡',f:'⛵'},
-  {t:'meio',u:['🌊','🌊','⛵','☀️'],n:9,g:6,d:'🐳',f:'🐳'}]},
- {nome:'Montanha dos Detetives',ic:'🔍',cor:'#F3EEFB',txt:'Tem uma figura fora do lugar. Encontre!',fases:[
-  {t:'erro',u:['🔴','🔵'],n:6,e:3,x:'🔴',f:'🔍'},
-  {t:'erro',u:['🐶','🐱'],n:7,e:4,x:'🐰',f:'🐾'},
-  {t:'erro',u:['🍎','🍎','🍌'],n:9,e:5,x:'🍎',f:'🧭'},
-  {t:'erro',u:['🔴','🔵','🟡'],n:9,e:6,x:'🔵',f:'🏔️'},
-  {t:'erro',u:['⭐','🌙','🌙'],n:9,e:7,x:'⭐',f:'🔦'},
-  {t:'erro',u:['🟢','🟢','🟡','🟡'],n:10,e:8,x:'🟡',f:'🗺️'}]},
- {nome:'Castelo dos Construtores',ic:'🏰',cor:'#FFF4E0',txt:'Você constrói o final da sequência, uma casa de cada vez.',fases:[
-  {t:'construir',u:['🔴','🔵'],n:6,k:2,d:'🟡',f:'🧱'},
-  {t:'construir',u:['👑','💎'],n:7,k:3,d:'🗝️',f:'👑'},
-  {t:'construir',u:['🐉','🐉','🛡️'],n:8,k:3,d:'⚔️',f:'🐉'},
-  {t:'construir',u:['🔴','🟡','🔵'],n:9,k:3,d:'🟢',f:'🛡️'},
-  {t:'construir',u:['🟣','🟣','🟠','🟠'],n:10,k:4,d:'🟢',f:'💎'},
-  {t:'construir',u:['🏰','🌳','🌳','🏰'],n:10,k:4,d:'⭐',f:'🏰'}]},
- {nome:'Céu das Setas',ic:'🚀',cor:'#EAEBFA',txt:'Setas que giram e coisas que crescem.',fases:[
-  {t:'next',u:['⬆️','➡️'],n:5,d:'⬇️',f:'🪁'},
-  {t:'next',u:['⬆️','➡️','⬇️','⬅️'],n:6,f:'🧭',h:'A seta vai girando, sempre para o mesmo lado.'},
-  {t:'next',u:['🌑','🌓','🌕'],n:5,d:'🌗',f:'🌙'},
-  {t:'next',s:['1️⃣','2️⃣','3️⃣','4️⃣'],a:'5️⃣',o:['3️⃣','5️⃣','7️⃣'],f:'🪐',h:'Cada número é um a mais que o anterior.'},
-  {t:'next',s:['🟡','🟡🟡','🟡🟡🟡'],a:'🟡🟡🟡🟡',o:['🟡🟡','🟡🟡🟡🟡','🟡🟡🟡🟡🟡🟡'],f:'☄️',h:'Cada casa tem uma bolinha a mais.'},
-  {t:'construir',u:['⬆️','➡️','⬇️','⬅️'],n:8,k:4,f:'🚀',h:'A seta vai girando, sempre para o mesmo lado.'}]}
-];
-var FASES=[]; MUNDOS.forEach(function(m,mi){ m.fases.forEach(function(f,fi){ f.m=mi; f.i=fi; FASES.push(f); }); });
+<div class="veu oculto" id="premio" role="dialog" aria-modal="true" aria-labelledby="premioTit"></div>
 
-var INSTR={next:'Qual vem depois?',meio:'Qual está faltando no meio?',erro:'Tem uma figura fora do lugar. Toque nela!',construir:'Complete a sequência, uma casa de cada vez.'};
-var ELOGIOS=['Muito bem!','Você conseguiu!','Isso mesmo!','Que olhar atento!','Mandou bem!'];
-
-/* ---------- memória (neste aparelho) ---------- */
-var CHAVE='padroes-v2';
-var est={feitas:{},som:false,anim:true,livre:false};
-try{ var sv=JSON.parse(localStorage.getItem(CHAVE)||'null'); if(sv) for(var k in sv) est[k]=sv[k]; }catch(e){}
-try{ if(!localStorage.getItem(CHAVE) && window.matchMedia('(prefers-reduced-motion: reduce)').matches) est.anim=false; }catch(e){}
-function salva(){ try{ localStorage.setItem(CHAVE,JSON.stringify(est)); }catch(e){} }
-
-var $=function(i){return document.getElementById(i)};
-function el(tag,cls,txt){ var d=document.createElement(tag); if(cls) d.className=cls; if(txt!=null) d.textContent=txt; return d; }
-function nSimb(s){ return Array.from(s.replace(/\uFE0F|\u20E3/g,'')).length; }
-function aplicaAnim(){ document.body.classList.toggle('semAnim',!est.anim); }
-aplicaAnim();
-
-/* ---------- som suave (desligado por padrão) ---------- */
-var ctx=null;
-function tom(freqs){
-  if(!est.som) return;
-  try{
-    ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();
-    freqs.forEach(function(f,i){
-      var o=ctx.createOscillator(),g=ctx.createGain(),t=ctx.currentTime+i*.12;
-      o.type='sine'; o.frequency.value=f; g.gain.setValueAtTime(0,t);
-      g.gain.linearRampToValueAtTime(.08,t+.03); g.gain.exponentialRampToValueAtTime(.0001,t+.35);
-      o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+.4);
-    });
-  }catch(e){}
-}
-function fala(txt){
-  try{ speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(txt.replace(/[^\p{L}\p{N}\s.,!?]/gu,'')); u.lang='pt-BR'; u.rate=.9; speechSynthesis.speak(u); }catch(e){}
-}
-
-/* ---------- navegação ---------- */
-function mostra(id){
-  ['mapa','jogo','album','ajustes'].forEach(function(t){ $(t).classList.toggle('oculto',t!==id); });
-  $('premio').classList.add('oculto');
-  window.scrollTo(0,0);
-}
-function aberta(i){ return est.livre || i===0 || !!est.feitas[i-1] || !!est.feitas[i]; }
-function proxima(){ for(var i=0;i<FASES.length;i++) if(!est.feitas[i]) return i; return -1; }
-
-function mapa(){
-  var t=$('mapa'); t.innerHTML='';
-  var p=proxima(), nFeitas=Object.keys(est.feitas).length;
-  var bv=el('div','boasVindas'); bv.appendChild(el('div','coruja','🦉'));
-  var msg = nFeitas===0 ? 'Oi! Eu sou a Lu. Vamos descobrir padrões juntos? Toque na bolinha amarela para começar.'
-          : p<0 ? 'Você visitou todos os mundos! Pode jogar qualquer fase de novo quando quiser.'
-          : 'Que bom te ver! A bolinha amarela mostra onde paramos.';
-  bv.appendChild(el('div','balao',msg)); t.appendChild(bv);
-  var ms=el('div','mundos');
-  MUNDOS.forEach(function(m){
-    var c=el('div','mundo'); c.style.background=m.cor;
-    var h=el('h2'); h.appendChild(el('span','ic',m.ic)); h.appendChild(el('span',null,m.nome)); c.appendChild(h);
-    c.appendChild(el('p',null,m.txt));
-    var tr=el('div','trilha');
-    m.fases.forEach(function(f,fi){
-      var gi=FASES.indexOf(f);
-      if(fi>0) tr.appendChild(el('span','liga'));
-      var b=el('button','fase');
-      if(est.feitas[gi]){ b.classList.add('feita'); b.textContent=f.f; b.setAttribute('aria-label','Fase '+(fi+1)+', já visitada'); }
-      else if(aberta(gi)){ b.textContent=fi+1; if(gi===p) b.classList.add('proxima'); b.setAttribute('aria-label','Fase '+(fi+1)); }
-      else { b.classList.add('trancada'); b.textContent='🔒'; b.setAttribute('aria-label','Fase '+(fi+1)+', ainda fechada'); }
-      b.onclick=function(){ if(aberta(gi)) joga(gi); };
-      tr.appendChild(b);
-    });
-    c.appendChild(tr); ms.appendChild(c);
-  });
-  t.appendChild(ms);
-  mostra('mapa');
-}
-
-/* ---------- jogo ---------- */
-var atual=0, L=null, seqCheia=[], resp=[], pos=0, dicaVista=false, erros=0, miniFase=false;
-
-function joga(i){
-  atual=i; L=FASES[i]; erros=0; dicaVista=false; $('aviso').innerHTML='';
-  var m=MUNDOS[L.m];
-  var ps=$('passos'); ps.innerHTML='';
-  m.fases.forEach(function(f,fi){ var d=el('i'); if(est.feitas[FASES.indexOf(f)]) d.className='f'; if(fi===L.i) d.className='a'; ps.appendChild(d); });
-  $('pergunta').textContent=INSTR[L.t];
-
-  var tot = L.s ? L.s.length : L.n;
-  seqCheia=[]; for(var k=0;k<tot;k++) seqCheia.push(L.s ? L.s[k] : L.u[k%L.u.length]);
-  var visivel=seqCheia.slice();
-  resp=[]; pos=0;
-  if(L.t==='next'){ resp=[L.s?L.a:L.u[tot%L.u.length]]; visivel.push(null); }
-  if(L.t==='meio'){ resp=[visivel[L.g]]; visivel[L.g]=null; }
-  if(L.t==='erro'){ visivel[L.e]=L.x; }
-  if(L.t==='construir'){ for(var j=tot-L.k;j<tot;j++){ resp.push(visivel[j]); visivel[j]=null; } }
-
-  var pool=[];
-  if(L.t!=='erro'){
-    pool=L.o ? L.o.slice() : [];
-    if(!L.o){ L.u.forEach(function(x){ if(pool.indexOf(x)<0) pool.push(x); }); if(L.d) pool.push(L.d); }
-  }
-  // se alguma casa tem várias figuras (padrões que crescem), todas usam o mesmo tamanho pequeno
-  miniFase=seqCheia.concat(pool).some(function(e){ return nSimb(e)>1; });
-  var s=$('seq'); s.innerHTML='';
-  visivel.forEach(function(e,i2){
-    var d=el('div','item');
-    if(e===null){ d.classList.add('q'); d.textContent='?'; d.dataset.buraco='1'; }
-    else { d.textContent=e; if(miniFase) d.classList.add('mini'); }
-    if(L.t==='erro'){
-      d.classList.add('alvo'); d.tabIndex=0; d.setAttribute('role','button');
-      d.onclick=function(){ tocaErro(i2,d); };
-      d.onkeydown=function(ev){ if(ev.key==='Enter'||ev.key===' '){ ev.preventDefault(); tocaErro(i2,d); } };
-    }
-    s.appendChild(d);
-  });
-  marcaBuraco();
-
-  var o=$('opcoes'); o.innerHTML='';
-  if(L.t!=='erro'){
-    pool.sort(function(){return Math.random()-.5});
-    pool.forEach(function(e){
-      var b=el('button','op',e); if(miniFase) b.classList.add('mini');
-      b.setAttribute('aria-label','Opção '+e);
-      b.onclick=function(){ escolhe(e,b); }; o.appendChild(b);
-    });
-  }
-  $('btDica').classList.remove('oculto');
-  mostra('jogo');
-}
-function buracos(){ return Array.prototype.slice.call($('seq').querySelectorAll('[data-buraco]')); }
-function marcaBuraco(){ buracos().forEach(function(b,i){ b.classList.toggle('agora',i===0); }); }
-
-function avisa(txt){ var a=$('aviso'); a.innerHTML=''; var d=el('div',est.anim?'surge':'',txt); a.appendChild(d); }
-function quase(alvo){
-  erros++; tom([330]);
-  var frases=['Ainda não. Tudo bem! Olhe de novo 👀','Hmm, quase! Veja o pedaço que se repete.','Vamos com calma. A dica pode ajudar 💡'];
-  avisa(frases[Math.min(erros-1,frases.length-1)]);
-  if(alvo && est.anim){ alvo.classList.remove('balanca'); void alvo.offsetWidth; alvo.classList.add('balanca'); }
-  if(erros>=2 && !dicaVista) $('btDica').classList.add('surge');
-}
-function escolhe(e,b){
-  var b0=buracos()[0]; if(!b0) return;
-  if(e===resp[pos]){
-    b0.textContent=e; if(miniFase) b0.classList.add('mini');
-    b0.classList.remove('q','agora'); b0.classList.add('preenchido'); delete b0.dataset.buraco;
-    pos++; erros=0; tom([523]);
-    if(pos>=resp.length) conclui();
-    else { avisa('Isso! Agora a próxima casa.'); marcaBuraco(); }
-  } else quase(b);
-}
-function tocaErro(i,d){
-  if(i===L.e){ d.classList.add('achou'); d.textContent=seqCheia[i]; conclui(); }
-  else { d.classList.add('conferido'); avisa('Essa está no lugar certo 👍 Procure outra.'); tom([330]); erros++; }
-}
-function dica(){
-  dicaVista=true; $('btDica').classList.remove('surge');
-  var itens=$('seq').children;
-  for(var i=0;i<itens.length;i++) itens[i].classList.remove('dica');
-  if(L.h){ avisa('💡 '+L.h); return; }
-  for(var j=0;j<L.u.length && j<itens.length;j++) if(!itens[j].dataset.buraco) itens[j].classList.add('dica');
-  var txt = L.t==='erro' ? '💡 As amarelas mostram o pedaço que se repete. Qual figura não segue esse pedaço?'
-          : '💡 As amarelas mostram o pedaço que se repete: '+L.u.join(' ');
-  avisa(txt);
-}
-function conclui(){
-  var novo=!est.feitas[atual]; est.feitas[atual]=1; salva();
-  tom([523,659,784]);
-  var ult=atual===FASES.length-1, fimMundo=L.i===MUNDOS[L.m].fases.length-1;
-  var p=$('premio'); p.innerHTML='';
-  var c=el('div','cartao');
-  c.appendChild(el('div','tit',ELOGIOS[Math.floor(Math.random()*ELOGIOS.length)]));
-  var fg=el('div','figurinha'+(est.anim?' surge':''),L.f); fg.setAttribute('aria-hidden','true'); c.appendChild(fg);
-  c.appendChild(el('div','sub', novo ? 'Uma figurinha nova para o seu álbum!' : 'Essa figurinha já está no seu álbum.'));
-  if(fimMundo) c.appendChild(el('div','sub','Você explorou todo o mundo '+MUNDOS[L.m].nome+' '+MUNDOS[L.m].ic));
-  var lb=el('div','linhaBts');
-  if(!ult){ var bp=el('button','btPrin','Continuar →'); bp.onclick=function(){ joga(atual+1); }; lb.appendChild(bp); }
-  else { var ba=el('button','btPrin','Ver meu álbum 📒'); ba.onclick=album; lb.appendChild(ba); }
-  var bm=el('button','btSec','🗺️ Mapa'); bm.onclick=mapa; lb.appendChild(bm);
-  c.appendChild(lb); p.appendChild(c); p.classList.remove('oculto');
-  setTimeout(function(){ var b=p.querySelector('.btPrin'); if(b) b.focus(); },50);
-}
-
-/* ---------- álbum ---------- */
-function album(){
-  var t=$('album'); t.innerHTML='';
-  t.appendChild(el('h2','tituloTela','📒 Meu álbum'));
-  t.appendChild(el('p','textoTela','Cada fase guarda uma figurinha. Não tem pressa: cada um completa o seu álbum no seu tempo.'));
-  MUNDOS.forEach(function(m){
-    var g=el('div','grupoAlbum'); var h=el('h3'); h.appendChild(el('span',null,m.ic)); h.appendChild(el('span',null,m.nome)); g.appendChild(h);
-    var gr=el('div','album');
-    m.fases.forEach(function(f){ var gi=FASES.indexOf(f); var s=el('div','slot'+(est.feitas[gi]?' tem':''), est.feitas[gi]?f.f:'?'); gr.appendChild(s); });
-    g.appendChild(gr); t.appendChild(g);
-  });
-  mostra('album');
-}
-
-/* ---------- ajustes ---------- */
-function ajustes(){
-  var t=$('ajustes'); t.innerHTML='';
-  t.appendChild(el('h2','tituloTela','⚙️ Ajustes'));
-  t.appendChild(el('p','textoTela','Os ajustes ficam guardados neste aparelho.'));
-  var box=el('div','ajustes');
-  function chave(nome,desc,prop,depois){
-    var b=el('button','ajuste'); b.setAttribute('role','switch'); b.setAttribute('aria-checked',est[prop]?'true':'false');
-    var tx=el('div','txt',nome); tx.appendChild(el('small',null,desc)); b.appendChild(tx); b.appendChild(el('div','chave'));
-    b.onclick=function(){ est[prop]=!est[prop]; salva(); b.setAttribute('aria-checked',est[prop]?'true':'false'); if(depois) depois(); };
-    box.appendChild(b);
-  }
-  chave('🔔 Sons','Sons baixinhos ao tocar nas figuras.','som');
-  chave('✨ Animações','Movimentos suaves na tela. Desligue se incomodar.','anim',aplicaAnim);
-  chave('🔓 Todas as fases abertas','Para o professor escolher qualquer fase.','livre');
-  var r=el('button','ajuste'); var rt=el('div','txt perigo','🧹 Recomeçar do zero'); rt.appendChild(el('small',null,'Apaga as figurinhas deste aparelho.'));
-  r.appendChild(rt);
-  r.onclick=function(){ if(confirm('Apagar todas as figurinhas deste aparelho?')){ est.feitas={}; salva(); mapa(); } };
-  box.appendChild(r);
-  t.appendChild(box);
-  mostra('ajustes');
-}
-
-$('btMapa').onclick=mapa;
-$('btAlbum').onclick=album;
-$('btAjustes').onclick=ajustes;
-$('btDica').onclick=dica;
-$('btOuvir').onclick=function(){ fala($('pergunta').textContent); };
-document.addEventListener('keydown',function(ev){ if(ev.key==='Escape' && !$('premio').classList.contains('oculto')) mapa(); });
-mapa();
-})();
-</script></body></html>
+<script src="icones.js"></script>
+<script src="jogo.js"></script>
+</body>
+</html>
